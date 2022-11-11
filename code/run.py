@@ -1,6 +1,6 @@
 import argparse
 from train import *
-
+import sys
 
 def main():
     parser = argparse.ArgumentParser('training on kannada mnist', add_help=False)
@@ -21,6 +21,8 @@ def main():
     parser.add_argument('--epsilon', default=3, type=float, help='strength of attack')
 
     parser.add_argument('--no_experts', default=4, type=int, help='no of experts')
+
+    parser.add_argument('--dir_path', default=sys.argv[1], type=int, help='data directory')
 
     global args
     args = parser.parse_args()

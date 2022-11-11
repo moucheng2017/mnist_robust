@@ -9,7 +9,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
-def call_datasets(train_noise=0, test_noise=0, dirpath='../data/np/'):
+def call_datasets(train_noise=0, test_noise=0, dir_path='../data/np/'):
     '''
     This function is to define which datasets to use for training and testing.
     :param train_noise: see blow for options
@@ -17,31 +17,31 @@ def call_datasets(train_noise=0, test_noise=0, dirpath='../data/np/'):
     :return:
     '''
     if train_noise == 0:
-        train_x = np.load(dirpath+'train/raw.npy')
+        train_x = np.load(dir_path+'train/raw.npy')
     else:
-        train_x = np.load(dirpath+'train/gaussian2.npy')
+        train_x = np.load(dir_path+'train/gaussian2.npy')
 
-    train_y = np.load(dirpath+'train/labels.npy')
+    train_y = np.load(dir_path+'train/labels.npy')
 
     if test_noise == 0:
-        test_x = np.load(dirpath+'test/raw.npy')
+        test_x = np.load(dir_path+'test/raw.npy')
     elif test_noise == 1:
-        test_x = np.load(dirpath+'test/gaussian5.npy')
+        test_x = np.load(dir_path+'test/gaussian5.npy')
     elif test_noise == 2:
-        test_x = np.load(dirpath+'test/gaussian10.npy')
+        test_x = np.load(dir_path+'test/gaussian10.npy')
     elif test_noise == 3:
-        test_x = np.load(dirpath+'test/blurred5.npy')
+        test_x = np.load(dir_path+'test/blurred5.npy')
     elif test_noise == 4:
-        test_x = np.load(dirpath+'test/blurred7.npy')
+        test_x = np.load(dir_path+'test/blurred7.npy')
     elif test_noise == 5:
-        test_x = np.load(dirpath+'test/jigsaw_images.npy') # jigsaw puzzle testing images
+        test_x = np.load(dir_path+'test/jigsaw_images.npy') # jigsaw puzzle testing images
     elif test_noise == 6:
-        test_x = np.load(dirpath+'test/new_class.npy') # new class in the segmentation
+        test_x = np.load(dir_path+'test/new_class.npy') # new class in the segmentation
     else:
-        test_x = np.load(dirpath+'test/raw.npy')
+        test_x = np.load(dir_path+'test/raw.npy')
         # with gradient attack
 
-    test_y = np.load(dirpath+'test/labels.npy')
+    test_y = np.load(dir_path+'test/labels.npy')
 
     return train_x, train_y, test_x, test_y
 
