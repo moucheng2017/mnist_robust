@@ -20,6 +20,8 @@ def main():
 
     parser.add_argument('--epsilon', default=3, type=float, help='strength of attack')
 
+    parser.add_argument('--no_experts', default=4, type=int, help='no of experts')
+
     global args
     args = parser.parse_args()
     trainer(args)
