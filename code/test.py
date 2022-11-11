@@ -40,8 +40,7 @@ def generate_results(test_x,
                      model,
                      model_config,
                      save_fig=0,
-                     save_conf_fig=0,
-                     save_calibration=0):
+                     save_conf_fig=0):
 
     # to do add some calibration plots
 
@@ -86,28 +85,10 @@ def generate_results(test_x,
     np.save('../results/' + model_config + '_errors.npy', error_maps)
     np.save('../results/' + model_config + '_eces.npy', ece_errors)
 
-    # # def display(rows, columns, images, values=[], predictions=[]):
-    # fig = plt.figure(figsize=(9, 11))
-    # ax = []
-    #
-    # for i in range(9):
-    #     img, lbl, pred, error = test_x[i], test_y[i], predictions[i], error_maps[i]
-    #     ax.append(fig.add_subplot(9, 4, i + 1))
-    #
-    #     title = ""
-    #
-    #     if (len(values) == 0):
-    #         title = "Pred:" + str(predictions[i])
-    #     elif (len(predictions) == 0):
-    #         title = "Value:" + str(values[i])
-    #     elif (len(values) != 0 and len(predictions) != 0):
-    #         title = "Value:" + str(values[i]) + "\nPred:" + str(predictions[i])
-    #
-    #     ax[-1].set_title(title)  # set title
-    #     plt.imshow(img, cmap='gray', vmin=0, vmax=1)
-    #
-    # plt.show()
+    return predictions, probabilities, error_maps, ece_errors
 
-    return predictions
+
+
+
 
 

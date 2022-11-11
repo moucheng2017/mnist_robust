@@ -7,15 +7,19 @@ __pycache__/
 /data
 
 # Ignore all wandb file:
+code/wandb/
 wandb/
 
 # Ignore log tensorboard:
-logs/
+code/logs*/
+logs*/
+
 
 # Ignore all generated results:
 results/
+code/results/
 
-*.pt
+code/*.pt
 
 *.pyc
 *.pyo
