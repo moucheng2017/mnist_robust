@@ -90,7 +90,10 @@ def trainer(args):
             log_qy = torch.log(qy+1e-20)
             g = Variable(torch.log(torch.Tensor([1.0/args.no_experts])).cuda())
             KLD = torch.sum(qy*(log_qy - g), dim=-1).mean()
-            loss = criterion(torch.sigmoid(outputs / args.temp), labels) + 0.1*KLD
+            if args.loss_fun == 'dice':
+                loss = criterion(torch.sigmoid(outputs / args.temp), labels) + 0.1*KLD
+            else:
+                loss = criterion(torch.sigmoid(outputs / args.temp), labels) + 0.1*KLD
         else:
             outputs = network(images)
             if args.loss_fun == 'dice':
