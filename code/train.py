@@ -9,6 +9,11 @@ from tensorboardX import SummaryWriter
 
 
 def count_parameters(model):
+    '''
+    This function calculates trainable parameters.
+    :param model:
+    :return:
+    '''
     return sum(p.numel() for p in model.parameters() if p.requires_grad)
 
 
@@ -37,17 +42,10 @@ def trainer(args):
     parameters = count_parameters(network)
     print('Model params: %d' % parameters)
 
+    model_config = 'e' + str(args.epochs) + '_' + args.net + '_l' + str(args.lr) + '_d' + str(args.dilation) + '_w' + str(args.width) + '_tr' + str(args.train_noise) + '_te' + str(args.test_noise) + '_p' + str(parameters) + '_ep' + str(args.epsilon)
+
     # Log:
-    writer = SummaryWriter('../logs/' +
-                           'e' + str(args.epochs) +
-                           '_' + args.net +
-                           '_l' + str(args.lr) +
-                           '_d' + str(args.dilation) +
-                           '_w' + str(args.width) +
-                           '_tr' + str(args.train_noise) +
-                           '_te' + str(args.test_noise) +
-                           '_p' + str(parameters) +
-                           '_ep' + str(args.epsilon))
+    writer = SummaryWriter('../logs/' + model_config)
 
     if args.loss_fun == 'dice':
         criterion = SoftDiceLoss()
@@ -121,7 +119,7 @@ def trainer(args):
 
             if val_acc > best_val_acc:
                 # save model
-                torch.save(network.state_dict(), 'model.pt')
+                torch.save(network.state_dict(), args.net + '_model.pt')
                 # update best val acc
                 best_val_acc = max(best_val_acc, val_acc)
 
@@ -131,7 +129,7 @@ def trainer(args):
 
     print('Finished Training\n')
 
-    torch.save(network.state_dict(), 'lastmodel.pt')
+    torch.save(network.state_dict(), model_config + '_lastmodel.pt')
 
     if args.net == 'moe':
         bestnetwork = UNetMoE(args.width, args.dilation)
@@ -143,10 +141,10 @@ def trainer(args):
         bestnetwork = UNet(args.width, args.dilation)
         lastnetwork = UNet(args.width, args.dilation)
 
-    bestnetwork.load_state_dict(torch.load('model.pt'))
+    bestnetwork.load_state_dict(torch.load(model_config + '_model.pt'))
     bestnetwork.eval()
 
-    lastnetwork.load_state_dict(torch.load('lastmodel.pt'))
+    lastnetwork.load_state_dict(torch.load(model_config + '_lastmodel.pt'))
     lastnetwork.eval()
 
     return bestnetwork, lastnetwork

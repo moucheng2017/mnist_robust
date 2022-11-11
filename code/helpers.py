@@ -1,16 +1,16 @@
-import os
-import random
-import pandas as pd
 import torch
-import math
 import numpy as np
 from torch.utils.data import Dataset
-import torch.optim as optim
 import torch.nn as nn
 
 
-def preprocess(train_noise=0, test_noise=0):
-
+def call_datasets(train_noise=0, test_noise=0):
+    '''
+    This function is to define which datasets to use for training and testing.
+    :param train_noise: see blow for options
+    :param test_noise: see below for options
+    :return:
+    '''
     if train_noise == 0:
         train_x = np.load('../data/np/train/raw.npy')
     else:
@@ -38,7 +38,15 @@ def preprocess(train_noise=0, test_noise=0):
 
 
 def get_dataloaders(train_x, train_y, test_x, test_y, batch):
-
+    '''
+    This function puts datasets into training loaders.
+    :param train_x:
+    :param train_y:
+    :param test_x:
+    :param test_y:
+    :param batch:
+    :return:
+    '''
     torch_train_x = torch.from_numpy(train_x).type(torch.FloatTensor).to('cuda')
     torch_train_y = torch.from_numpy(train_y).type(torch.FloatTensor).to('cuda')
 
@@ -55,6 +63,14 @@ def get_dataloaders(train_x, train_y, test_x, test_y, batch):
 
 
 def fgsm_attack(image, epsilon, data_grad):
+    '''
+    This is a function for the original sign based gradient attacks.
+    Ref: Explaining and Harnessing Adversarial Examples. Ian J. Goodfellow et al.
+    :param image: testing image
+    :param epsilon: strength of the attacks
+    :param data_grad: gradient of the loss on the testing image
+    :return: perturbed images with gardient noises
+    '''
     # Collect the element-wise sign of the data gradient
     sign_data_grad = data_grad.sign()
     # Create the perturbed image by adjusting each pixel of the input image
