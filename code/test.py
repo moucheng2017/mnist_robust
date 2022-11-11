@@ -88,6 +88,7 @@ def generate_results(test_x,
     return predictions, probabilities, error_maps, ece_errors
 
 
+# def plot_results(predictions, probabilities, error_maps, ece_errors):
 
 
 
