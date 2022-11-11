@@ -59,4 +59,5 @@ coverage.xml
 docs/_build/
 data/
 code/*.pt
+*.pt
 logs/

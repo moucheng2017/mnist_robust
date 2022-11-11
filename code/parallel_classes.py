@@ -1,8 +1,6 @@
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
-from torch import Tensor
-from typing import Optional, List, Tuple, Union
+
 
 ## arbitrary number of parallel MLP
 class MLP_para(nn.Module):
@@ -21,9 +19,10 @@ class MLP_para(nn.Module):
     def forward(self, x):
         outputs = []
         for expert in self.experts:
+            expert = expert.cuda()
             outputs.append(expert(x))
 
-        outputs = torch.FloatTensor(outputs)
+        outputs = torch.stack(outputs, dim=0)
         outputs = torch.sum(outputs, dim=0)
 
         return outputs
@@ -33,9 +32,9 @@ class conv2D_para(nn.Module):
     def __init__(self,
                  in_channels,
                  out_channels,
-                 dilation,
-                 kernel_size: int =3,
-                 num_experts: int = 2):
+                 dilation=1,
+                 num_experts: int = 2,
+                 kernel_size: int = 3):
         self.num_experts = num_experts
         self.in_channels = in_channels
         self.out_channels = out_channels
@@ -47,7 +46,7 @@ class conv2D_para(nn.Module):
         experts = []
         for expert in range(self.num_experts):
             experts.append(nn.Sequential(
-                nn.Conv2d(self.in_channels, self.out_channels, 3, padding=dilation, stride=1,
+                nn.Conv2d(self.in_channels, self.out_channels, self.kernel_size, padding=dilation, stride=1,
                           bias=False, dilation=dilation),
                 nn.BatchNorm2d(self.out_channels, affine=True),
                 nn.ReLU(inplace=True)
@@ -58,9 +57,12 @@ class conv2D_para(nn.Module):
     def forward(self, x):
         outputs = []
         for expert in self.experts:
+            expert = expert.cuda()
             outputs.append(expert(x))
-
-        outputs = torch.FloatTensor(outputs)
+        ## Outputs is a list of Sequentials
+        # print('Size of 1st sequential is', outputs[0].size())
+        outputs = torch.stack(outputs, dim=0)
         outputs = torch.sum(outputs, dim=0)
+        # print('The shape of outputs2 is ', outputs2.size())
 
         return outputs

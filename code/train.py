@@ -2,6 +2,7 @@ from model_base import *
 from model_mixture_of_exprts import *
 from model_product_of_exprts import *
 from helpers import *
+from model_moe_para_conv import UNetMoE_flexi
 
 # track the training
 from tensorboardX import SummaryWriter
@@ -28,6 +29,8 @@ def trainer(args):
         network = UNetMoE(args.width, args.dilation).cuda()
     elif args.net == 'poe':
         network = UNetPoE(args.width, args.dilation).cuda()
+    elif args.net == 'moe_para':
+        network = UNetMoE_flexi(args.width, args.dilation).cuda()
     else:
         network = UNet(args.width, args.dilation).cuda()
 
