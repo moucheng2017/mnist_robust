@@ -43,7 +43,7 @@ class UNetMoE(nn.Module):
         x = self.maxpool(conv1)
 
         conv2a = self.dconv_down2a(x)
-        conv2b = self.dconv_down2a(x)
+        conv2b = self.dconv_down2b(x)
         conv2 = conv2a + conv2b
         x = self.maxpool(conv2)
 
