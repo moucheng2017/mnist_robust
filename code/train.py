@@ -3,6 +3,8 @@ from model_mixture_of_exprts import *
 from model_product_of_exprts import *
 from helpers import *
 from model_moe_para_conv import UNetMoE_flexi
+import wandb
+from tqdm import tqdm
 
 # track the training
 from tensorboardX import SummaryWriter
@@ -57,6 +59,8 @@ def trainer(args):
     total_steps = steps_each_epoch*args.epochs
     best_val_acc = 0.0
 
+    wandb.init(project='explore-gradients', reinit=True)
+    wandb.watch(network, log='all')
     for j in range(total_steps):
 
         network.train()
@@ -137,6 +141,9 @@ def trainer(args):
     elif args.net == 'poe':
         bestnetwork = UNetPoE(args.width, args.dilation).cuda()
         lastnetwork = UNetPoE(args.width, args.dilation)
+    elif args.net == 'moe_para':
+        bestnetwork = UNetMoE_flexi(args.width, args.dilation).cuda()
+        lastnetwork = UNetMoE_flexi(args.width, args.dilation)
     else:
         bestnetwork = UNet(args.width, args.dilation)
         lastnetwork = UNet(args.width, args.dilation)
