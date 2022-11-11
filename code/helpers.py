@@ -19,24 +19,26 @@ def call_datasets(train_noise=0, test_noise=0):
     if train_noise == 0:
         train_x = np.load('../data/np/train/raw.npy')
     else:
-        train_x = np.load('../data/np/train/gaussian2.npy')
+        train_x = np.load('../data/np/train/noisy2.npy')
 
     train_y = np.load('../data/np/train/labels.npy')
 
     if test_noise == 0:
         test_x = np.load('../data/np/test/raw.npy')
     elif test_noise == 1:
-        test_x = np.load('../data/np/test/gaussian5.npy')
+        test_x = np.load('../data/np/test/noisy5.npy')
     elif test_noise == 2:
-        test_x = np.load('../data/np/test/gaussian10.npy')
+        test_x = np.load('../data/np/test/noisy10.npy')
     elif test_noise == 3:
-        test_x = np.load('../data/np/test/blurred5.npy')
+        test_x = np.load('../data/np/test/blurred9.npy')
     elif test_noise == 4:
-        test_x = np.load('../data/np/test/blurred7.npy')
+        test_x = np.load('../data/np/test/blurred15.npy')
     elif test_noise == 5:
         test_x = np.load('../data/np/test/jigsaw_images.npy') # jigsaw puzzle testing images
     elif test_noise == 6:
         test_x = np.load('../data/np/test/new_class.npy') # new class in the segmentation
+    elif test_noise == 7:
+        test_x = np.load('../data/np/test/autoaugmented.npy') # Automatically augmented images
     else:
         test_x = np.load('../data/np/test/raw.npy')
         # with gradient attack
