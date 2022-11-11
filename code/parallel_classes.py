@@ -54,15 +54,14 @@ class conv2D_para(nn.Module):
         self.experts = experts
 
 
-    def forward(self, x):
+    def forward(self, x, sum=None):
         outputs = []
         for expert in self.experts:
             expert = expert.cuda()
             outputs.append(expert(x))
         ## Outputs is a list of Sequentials
-        # print('Size of 1st sequential is', outputs[0].size())
         outputs = torch.stack(outputs, dim=0)
-        outputs = torch.sum(outputs, dim=0)
-        # print('The shape of outputs2 is ', outputs2.size())
+        if sum:
+            outputs = torch.sum(outputs, dim=0)
 
         return outputs

@@ -1,7 +1,8 @@
 import torch 
 import torch.nn as nn 
 import torch.nn.functional as F 
-from parrallel import conv2D_para 
+from parallel_classes import conv2D_para
+import numpy as np
 
 class Generalised_GMoE(nn.Module):
     def __init__(self, width, ks, mu=0, sigma= 1, dilation=5, num_elayers = None, standard_gate = True, random_gate=None, avg_gate=None, device='cuda'):
@@ -127,7 +128,10 @@ class Generalised_GMoE(nn.Module):
         
         #compute the initial output without gating 
         init_output = moe_layer(x) 
-
+        # print('NUM EXPERTS IS ', num_experts)
+        # print('BATCH SIZE IS', batch_size)
+        # print(f'Gate shape {gate.shape}')
+        # print(f'tensor shape {init_output.shape}')
         for i in range(num_experts):
           for j in range(batch_size):
             init_output[i, j] = torch.mul(init_output[i, j], torch.full((init_output[i, j].shape), float(gate[j, i])).to(self.device))   

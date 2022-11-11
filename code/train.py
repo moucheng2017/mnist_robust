@@ -3,10 +3,8 @@ from model_mixture_of_exprts import *
 from model_product_of_exprts import *
 from helpers import *
 from model_moe_para_conv import UNetMoE_flexi
-import wandb
-from tqdm import tqdm
 from torch import optim
-
+from model_general_gmoe import Generalised_GMoE
 # track the training
 from tensorboardX import SummaryWriter
 
@@ -39,6 +37,8 @@ def trainer(args):
         network = UNetPoE(args.width, args.dilation).cuda()
     elif args.net == 'moe_para':
         network = UNetMoE_flexi(args.width, args.dilation).cuda()
+    elif args.net == 'gen_gmoe':
+        network = Generalised_GMoE(args.width, ks=[2,2,2,2,2], num_elayers=[4,4,4,4,4]).cuda()
     else:
         network = UNet(args.width, args.dilation).cuda()
 
@@ -60,8 +60,6 @@ def trainer(args):
     total_steps = steps_each_epoch*args.epochs
     best_val_acc = 0.0
 
-    wandb.init(project='explore-gradients', reinit=True)
-    wandb.watch(network, log='all')
     for j in range(total_steps):
 
         network.train()
@@ -140,6 +138,9 @@ def trainer(args):
     elif args.net == 'moe_para':
         bestnetwork = UNetMoE_flexi(args.width, args.dilation).cuda()
         lastnetwork = UNetMoE_flexi(args.width, args.dilation)
+    elif args.net == 'gen_gmoe':
+        bestnetwork = Generalised_GMoE(args.width, ks=[2,2,2,2,2], num_elayers=[4,4,4,4,4]).cuda()
+        lastnetwork = Generalised_GMoE(args.width, ks=[2,2,2,2,2], num_elayers=[4,4,4,4,4])
     else:
         bestnetwork = UNet(args.width, args.dilation)
         lastnetwork = UNet(args.width, args.dilation)
