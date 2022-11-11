@@ -3,10 +3,23 @@
 __pycache__/
 *.py[cod]
 
+# Ignore data
+/data
+
 # Ignore all wandb file:
+code/wandb/
 wandb/
 
-logs/
+# Ignore log tensorboard:
+code/logs*/
+logs*/
+
+
+# Ignore all generated results:
+results/
+code/results/
+
+code/*.pt
 
 *.pyc
 *.pyo

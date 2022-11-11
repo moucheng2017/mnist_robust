@@ -1,33 +1,43 @@
-import os
-import random
-import pandas as pd
 import torch
-import math
+import sys
+sys.path.append('..')
+
+import torch.optim as optim
 import numpy as np
 from torch.utils.data import Dataset
-import torch.optim as optim
 import torch.nn as nn
 
 
-def preprocess(train_noise=0, test_noise=0):
-
+def call_datasets(train_noise=0, test_noise=0):
+    '''
+    This function is to define which datasets to use for training and testing.
+    :param train_noise: see blow for options
+    :param test_noise: see below for options
+    :return:
+    '''
     if train_noise == 0:
         train_x = np.load('../data/np/train/raw.npy')
     else:
-        train_x = np.load('../data/np/train/gaussian2.npy')
+        train_x = np.load('../data/np/train/noisy2.npy')
 
     train_y = np.load('../data/np/train/labels.npy')
 
     if test_noise == 0:
         test_x = np.load('../data/np/test/raw.npy')
     elif test_noise == 1:
-        test_x = np.load('../data/np/test/gaussian5.npy')
+        test_x = np.load('../data/np/test/noisy5.npy')
     elif test_noise == 2:
-        test_x = np.load('../data/np/test/gaussian10.npy')
+        test_x = np.load('../data/np/test/noisy10.npy')
     elif test_noise == 3:
-        test_x = np.load('../data/np/test/blurred5.npy')
+        test_x = np.load('../data/np/test/blurred9.npy')
     elif test_noise == 4:
-        test_x = np.load('../data/np/test/blurred7.npy')
+        test_x = np.load('../data/np/test/blurred15.npy')
+    elif test_noise == 5:
+        test_x = np.load('../data/np/test/jigsaw_images.npy') # jigsaw puzzle testing images
+    elif test_noise == 6:
+        test_x = np.load('../data/np/test/new_class.npy') # new class in the segmentation
+    elif test_noise == 7:
+        test_x = np.load('../data/np/test/autoaugmented.npy') # Automatically augmented images
     else:
         test_x = np.load('../data/np/test/raw.npy')
         # with gradient attack
@@ -38,7 +48,15 @@ def preprocess(train_noise=0, test_noise=0):
 
 
 def get_dataloaders(train_x, train_y, test_x, test_y, batch):
-
+    '''
+    This function puts datasets into training loaders.
+    :param train_x:
+    :param train_y:
+    :param test_x:
+    :param test_y:
+    :param batch:
+    :return:
+    '''
     torch_train_x = torch.from_numpy(train_x).type(torch.FloatTensor).to('cuda')
     torch_train_y = torch.from_numpy(train_y).type(torch.FloatTensor).to('cuda')
 
@@ -55,6 +73,14 @@ def get_dataloaders(train_x, train_y, test_x, test_y, batch):
 
 
 def fgsm_attack(image, epsilon, data_grad):
+    '''
+    This is a function for the original sign based gradient attacks.
+    Ref: Explaining and Harnessing Adversarial Examples. Ian J. Goodfellow et al.
+    :param image: testing image
+    :param epsilon: strength of the attacks
+    :param data_grad: gradient of the loss on the testing image
+    :return: perturbed images with gardient noises
+    '''
     # Collect the element-wise sign of the data gradient
     sign_data_grad = data_grad.sign()
     # Create the perturbed image by adjusting each pixel of the input image
