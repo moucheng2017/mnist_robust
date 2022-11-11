@@ -44,12 +44,11 @@ def trainer(args):
 
     elif args.net == 'pgmoe':
         network = Generalised_GMoE_VI(width=args.width,
-                                      dilation=args.dilation,
-                                      num_eplayers=[args.no_experts,
+                                      num_elayers=(args.no_experts,
                                                     args.no_experts,
                                                     args.no_experts,
                                                     args.no_experts,
-                                                    args.no_experts]
+                                                    args.no_experts)
                                       ).cuda()
     else:
         network = UNet(args.width, args.dilation).cuda()
@@ -88,7 +87,7 @@ def trainer(args):
         if args.net == 'pgmoe':
             outputs, qy = network(images)
             log_qy = torch.log(qy+1e-20)
-            g = Variable(torch.log(torch.Tensor([1.0/args.no_experts])).cuda())
+            g = nn.Parameter(torch.log(torch.Tensor([1.0/args.no_experts])).cuda())
             KLD = torch.sum(qy*(log_qy - g), dim=-1).mean()
             if args.loss_fun == 'dice':
                 loss = criterion(torch.sigmoid(outputs / args.temp), labels) + 0.1*KLD
@@ -126,7 +125,7 @@ def trainer(args):
                     v_img.requires_grad = True
                     if args.net == 'pgmoe':
                         v_output, qy = network(v_img)
-                    else;
+                    else:
                         v_output = network(v_img)
                     v_loss = criterion(torch.sigmoid(v_output), v_target)
                     network.zero_grad()

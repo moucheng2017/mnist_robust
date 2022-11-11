@@ -28,12 +28,14 @@ class conv2D_para(nn.Module):
             ))
         self.experts = experts
 
-
     def forward(self, x):
-        outputs = []
-        for expert in self.experts:
+
+        for i, expert in enumerate(self.experts):
             expert = expert.cuda()
-            outputs.append(expert(x))
+            if i == 0:
+                outputs = expert(x)
+            else:
+                outputs = torch.concat((outputs, expert(x)), dim=1)
         ## Outputs is a list of Sequentials
         # print('Size of 1st sequential is', outputs[0].size())
         # outputs = torch.stack(outputs, dim=0)
@@ -44,7 +46,7 @@ class conv2D_para(nn.Module):
 
 
 class Generalised_GMoE_VI(nn.Module):
-    def __init__(self, width, dilation=5, num_elayers=None, device='cuda'):
+    def __init__(self, width,  num_elayers, device='cuda'):
         super().__init__()
 
         # # the mean of the gaussian which will be added to the gate
@@ -98,6 +100,7 @@ class Generalised_GMoE_VI(nn.Module):
 
     def eval_gate(self, x, moe_layer, gate, temperature):
         output = moe_layer(x)
+        output = torch.chunk(output, 4, dim=1)
         weight = gate(x)
         weight = self.gumbel_softmax_sample(weight, temperature)
         output = [output[i]*weight[:, i] for i in range(len(output))]
@@ -105,7 +108,7 @@ class Generalised_GMoE_VI(nn.Module):
         output = torch.sum(output, dim=0)
         return output, weight
 
-    def forward(self, x, temp):
+    def forward(self, x):
         """
         --- forward ---
 
@@ -113,7 +116,7 @@ class Generalised_GMoE_VI(nn.Module):
 
         """
         # mix the experts
-        conv1, w1  = self.eval_gate(x, self.dconv_down1(x), self.gate1, 2.0)
+        conv1, w1 = self.eval_gate(x, self.dconv_down1(x), self.gate1, 2.0)
         x = self.maxpool(conv1)
 
         # mix the experts
