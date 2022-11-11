@@ -3,6 +3,7 @@ import torch.optim as optim
 import numpy as np
 from torch.utils.data import Dataset
 import torch.nn as nn
+import torch.nn.functional as F
 
 
 def call_datasets(train_noise=0, test_noise=0):

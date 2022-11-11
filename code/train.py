@@ -1,6 +1,7 @@
 from model_base import *
 from model_mixture_of_exprts import *
 from model_product_of_exprts import *
+from model_general_gmoe_prob import *
 from helpers import *
 
 # track the training
@@ -37,8 +38,19 @@ def trainer(args):
     # networks and optimizer:
     if args.net == 'moe':
         network = UNetMoE(args.width, args.dilation).cuda()
+
     elif args.net == 'poe':
         network = UNetPoE(args.width, args.dilation).cuda()
+
+    elif args.net == 'pgmoe':
+        network = Generalised_GMoE_VI(width=args.width,
+                                      dilation=args.dilation,
+                                      num_eplayers=[args.no_experts,
+                                                    args.no_experts,
+                                                    args.no_experts,
+                                                    args.no_experts,
+                                                    args.no_experts]
+                                      ).cuda()
     else:
         network = UNet(args.width, args.dilation).cuda()
 
@@ -72,12 +84,19 @@ def trainer(args):
             images, labels = next(train_iterator)
 
         optimizer.zero_grad()
-        outputs = network(images)
 
-        if args.loss_fun == 'dice':
-            loss = criterion(torch.sigmoid(outputs / args.temp), labels)
+        if args.net == 'pgmoe':
+            outputs, qy = network(images)
+            log_qy = torch.log(qy+1e-20)
+            g = Variable(torch.log(torch.Tensor([1.0/args.no_experts])).cuda())
+            KLD = torch.sum(qy*(log_qy - g), dim=-1).mean()
+            loss = criterion(torch.sigmoid(outputs / args.temp), labels) + 0.1*KLD
         else:
-            loss = criterion(torch.sigmoid(outputs / args.temp), labels)
+            outputs = network(images)
+            if args.loss_fun == 'dice':
+                loss = criterion(torch.sigmoid(outputs / args.temp), labels)
+            else:
+                loss = criterion(torch.sigmoid(outputs / args.temp), labels)
 
         loss.backward()
         optimizer.step()
@@ -102,7 +121,10 @@ def trainer(args):
                 counter_v += 1
                 if args.epsilon > 0:
                     v_img.requires_grad = True
-                    v_output = network(v_img)
+                    if args.net == 'pgmoe':
+                        v_output, qy = network(v_img)
+                    else;
+                        v_output = network(v_img)
                     v_loss = criterion(torch.sigmoid(v_output), v_target)
                     network.zero_grad()
                     v_loss.backward()
