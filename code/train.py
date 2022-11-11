@@ -23,7 +23,7 @@ def trainer(args):
     np.random.seed(args.seed)
 
     # data loaders
-    train_x, train_y, test_x, test_y = preprocess(train_noise=args.train_noise, test_noise=args.test_noise)
+    train_x, train_y, test_x, test_y = call_datasets(train_noise=args.train_noise, test_noise=args.test_noise)
     train_loader, test_loader = get_dataloaders(train_x, train_y, test_x, test_y, args.batch)
     train_iterator = iter(train_loader)
     test_iterator = iter(test_loader)

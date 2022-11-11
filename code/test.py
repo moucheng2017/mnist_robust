@@ -6,6 +6,35 @@ from collections import deque
 import imageio
 
 
+def calculate_ece(prob, label):
+    bin_no = 10
+    accs = []
+    confs = []
+    differences = []
+    no_predicted_pixels = []
+    for i in range(bin_no):
+        if i > 4:
+            # this 4 threshold means we only count prob > 0.5
+            bin_starting = i*(1 / bin_no)
+            bin_ending = (i+1)*(1 / bin_no)
+            # avg:
+            mask = (prob > bin_starting) & (prob <= bin_ending)
+            correctly_predicted_foreground = label[mask]
+            correctly_predicted_foreground = np.count_nonzero(correctly_predicted_foreground)
+            predicted_foreground = mask.sum()
+            no_predicted_pixels.append(predicted_foreground)
+            acc = (correctly_predicted_foreground+1) / (predicted_foreground + 1)
+            accs.append(acc)
+            conf = prob[mask]
+            conf = np.mean(conf)
+            confs.append(conf)
+            differences.append(abs(acc - conf))
+    # avg:
+    error = [i*j for i, j in zip(differences, no_predicted_pixels)]
+    error = sum(error) / sum(no_predicted_pixels)
+    return error
+
+
 def generate_results(test_x,
                      test_y,
                      model,
@@ -21,6 +50,7 @@ def generate_results(test_x,
     predictions = deque()
     probabilities = deque()
     error_maps = deque()
+    ece_errors = deque()
 
     for i in range(test_x_o):
         data = np.expand_dims(test_x[i], axis=0)
@@ -30,7 +60,7 @@ def generate_results(test_x,
         predictions.append(pred)
         probabilities.append(prob)
 
-        # get errors:
+        # get fp, fn, errors:
         h, w = np.shape(pred)
         error = np.zeros((h, w, 3))
         lbl = test_y[i]
@@ -38,6 +68,10 @@ def generate_results(test_x,
         error[(pred == 0) & (lbl == 1)] = [0, 255, 0]  # false negatives
         error[(pred == 1) & (lbl == 1)] = [0, 0, 255]  # true positives
         error_maps.append(error)
+
+        # get ece:
+        ece = calculate_ece(prob, lbl)
+        ece_errors.append(ece)
 
         # save the segmentation:
         if save_fig == 1:
@@ -50,6 +84,7 @@ def generate_results(test_x,
     np.save('../results/' + model_config + '_preds.npy', predictions)
     np.save('../results/' + model_config + '_probs.npy', probabilities)
     np.save('../results/' + model_config + '_errors.npy', error_maps)
+    np.save('../results/' + model_config + '_eces.npy', ece_errors)
 
     # # def display(rows, columns, images, values=[], predictions=[]):
     # fig = plt.figure(figsize=(9, 11))
