@@ -28,6 +28,10 @@ def call_datasets(train_noise=0, test_noise=0):
         test_x = np.load('../data/np/test/blurred5.npy')
     elif test_noise == 4:
         test_x = np.load('../data/np/test/blurred7.npy')
+    elif test_noise == 5:
+        test_x = np.load('../data/np/test/jigsaw_images.npy') # jigsaw puzzle testing images
+    elif test_noise == 6:
+        test_x = np.load('../data/np/test/new_class.npy') # new class in the segmentation
     else:
         test_x = np.load('../data/np/test/raw.npy')
         # with gradient attack

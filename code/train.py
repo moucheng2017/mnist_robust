@@ -89,14 +89,12 @@ def trainer(args):
         train_acc = 100 * train_acc
 
         if j % steps_each_epoch == 0 and j != 0:
-        # if j % 50 == 0 and j != 0:
             network.eval()
             val_acc = 0
             counter_v = 0
             for (v_img, v_target) in test_iterator:
                 counter_v += 1
-
-                if args.test_noise > 4:
+                if args.epsilon > 0:
                     v_img.requires_grad = True
                     v_output = network(v_img)
                     v_loss = criterion(torch.sigmoid(v_output), v_target)
@@ -107,19 +105,16 @@ def trainer(args):
                     v_output = network(perturbed_data)
                 else:
                     v_output = network(v_img)
-
                 v_pred = (torch.sigmoid(v_output) > 0.5).float()  # get the index of the max log-probability
                 v_correct = v_pred.eq(v_target.view_as(v_pred)).sum().item()
                 val_acc += v_correct / v_img.size()[0] / v_img.size()[1] / v_img.size()[2] / v_img.size()[3]
             val_acc = 100 * val_acc / counter_v
             print('[step %d] loss: %.4f, lr: %.4f, train acc:%.4f, test acc: %.4f' % (j + 1, running_loss, current_lr, train_acc, val_acc))
-
             if val_acc > best_val_acc:
                 # save model
                 torch.save(network.state_dict(), args.net + '_model.pt')
                 # update best val acc
                 best_val_acc = max(best_val_acc, val_acc)
-
             # log in:
             writer.add_scalar('loss', loss.item(), j)
             writer.add_scalar('val acc', val_acc, j)

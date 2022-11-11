@@ -44,10 +44,11 @@ python run.py
                  2 for gaussian noise sigma 1.0; 
                  3 for gaussian blurr with sigma 0.5;
                  4 for gaussian blurr with sigma 0.7;
-                 5 for FGSM adversarial attack
---epsilon 5 # this only works when test_noise is 5 or above, 
-              this value is the strength of the gradient attack
-            
+                 5 for jigsaw images;
+                 6 for new class image
+--epsilon 5 # when larger than 0, it will use gradient attack,
+              this is the strength of the FGSM attack
+              
 ```
 
 ### Hyper-parameters:
