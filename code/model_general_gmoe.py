@@ -127,15 +127,16 @@ class Generalised_GMoE(nn.Module):
         batch_size = x.size(0) 
         
         #compute the initial output without gating 
-        init_output = moe_layer(x) 
-        # print('NUM EXPERTS IS ', num_experts)
-        # print('BATCH SIZE IS', batch_size)
-        # print(f'Gate shape {gate.shape}')
-        # print(f'tensor shape {init_output.shape}')
+        init_output = moe_layer(x)
+        init_output2 = init_output.clone()
         for i in range(num_experts):
           for j in range(batch_size):
             init_output[i, j] = torch.mul(init_output[i, j], torch.full((init_output[i, j].shape), float(gate[j, i])).to(self.device))   
-       
+        print(f'DIMENSION OF init_output2 BEFORE: ', init_output2.size())
+        init_output2 = torch.mul(torch.movedim(init_output2,  (0, 1, 2, 3, 4), (4, 3, 0, 1, 2)) , gate.reshape(batch_size, num_experts))
+        print(f'DIMENSION OF init_output2 AFTER: ', init_output2.size())
+        print('UNITS TEST:')
+        print(init_output == init_output2.reshape(4, 1024, 10, 28, 28))
         #this controls whether or not we average the results following a random gate or not 
         mod = (1/num_experts) if self.random_gate else 1 
 
