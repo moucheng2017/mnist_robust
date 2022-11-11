@@ -126,7 +126,7 @@ def trainer(args):
                     v_img.requires_grad = True
                     if args.net == 'pgmoe':
                         v_output, qy = network(v_img)
-                    else;
+                    else:
                         v_output = network(v_img)
                     v_loss = criterion(torch.sigmoid(v_output), v_target)
                     network.zero_grad()
