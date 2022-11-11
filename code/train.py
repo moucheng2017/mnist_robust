@@ -7,6 +7,12 @@ from helpers import *
 from tensorboardX import SummaryWriter
 
 
+def log_gradients_in_model(model, logger, step):
+    for tag, value in model.named_parameters():
+        if value.grad is not None:
+            logger.add_histogram(tag + "/grad", value.grad.cpu(), step)
+
+
 def count_parameters(model):
     '''
     This function calculates trainable parameters.
@@ -112,12 +118,14 @@ def trainer(args):
             print('[step %d] loss: %.4f, lr: %.4f, train acc:%.4f, test acc: %.4f' % (j + 1, running_loss, current_lr, train_acc, val_acc))
             if val_acc > best_val_acc:
                 # save model
-                torch.save(network.state_dict(), args.net + '_model.pt')
+                torch.save(network.state_dict(), model_config + '_model.pt')
                 # update best val acc
                 best_val_acc = max(best_val_acc, val_acc)
             # log in:
             writer.add_scalar('loss', loss.item(), j)
             writer.add_scalar('val acc', val_acc, j)
+
+        log_gradients_in_model(network, writer, j)
 
     print('Finished Training\n')
 
