@@ -30,18 +30,17 @@ class conv2D_para(nn.Module):
         self.experts = experts
 
 
-    def forward(self, x):
+    def forward(self, x, sum=None):
         outputs = []
         for expert in self.experts:
             expert = expert.cuda()
             outputs.append(expert(x))
         ## Outputs is a list of Sequentials
-        # print('Size of 1st sequential is', outputs[0].size())
         outputs = torch.stack(outputs, dim=0)
-        outputs = torch.sum(outputs, dim=0)
-        # print('The shape of outputs2 is ', outputs2.size())
+        if sum:
+            outputs = torch.sum(outputs, dim=0)
 
-        return
+        return outputs
 
 
 class Generalised_GMoE(nn.Module):
@@ -137,13 +136,12 @@ class Generalised_GMoE(nn.Module):
         elif self.random_gate:
             # compute the random gate
             gate = torch.tensor(np.random.binomial(1, 0.5, (x.size(0), num_experts))).to(self.device)
-            return gate
 
         elif self.avg_gate:
             # compute the average gate
             gate = (torch.ones(x.size(0), num_experts) * (1.0 / num_experts)).to(self.device)
 
-            return gate
+        return gate
 
     def eval_gate(self, x, moe_layer, gate, noise, num_experts, k):
         """
@@ -181,7 +179,6 @@ class Generalised_GMoE(nn.Module):
         outputs = torch.sum(init_output, dim=0) * mod
 
         return outputs
-
 
     def forward(self, x):
         """

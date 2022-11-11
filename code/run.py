@@ -20,7 +20,10 @@ def main():
 
     parser.add_argument('--epsilon', default=3, type=float, help='strength of attack')
 
-    parser.add_argument('--no_experts', default=4, type=int, help='no of experts')
+    parser.add_argument('--num_elayers', default=(4, 4, 4, 4, 4), help='no of experts')
+    parser.add_argument('--ks', default=(4, 4, 4, 4, 4), help='k top players')
+    parser.add_argument('--gate_type', default=1, help='1: avg_gate 2:random gate 3: learnt gate')
+
 
     global args
     args = parser.parse_args()

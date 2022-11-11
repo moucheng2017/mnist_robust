@@ -2,6 +2,7 @@ from model_base import *
 from model_mixture_of_exprts import *
 from model_product_of_exprts import *
 from model_general_gmoe_prob import *
+from model_general_gmoe_main import *
 from helpers import *
 
 # track the training
@@ -41,6 +42,31 @@ def trainer(args):
 
     elif args.net == 'poe':
         network = UNetPoE(args.width, args.dilation).cuda()
+
+    elif args.net == 'gmoe':
+
+        if args.gate_type == 1:
+            standard_gate = False
+            random_gate = False
+            avg_gate = True
+        elif args.gate_type == 2:
+            standard_gate = False
+            random_gate = True
+            avg_gate = False
+        else:
+            standard_gate = True
+            random_gate = False
+            avg_gate = False
+
+        network = Generalised_GMoE(width=args.width,
+                                   ks=args.ks,
+                                   mu=0,
+                                   sigma=1,
+                                   dilation=1,
+                                   num_elayers=args.num_elayers,
+                                   standard_gate=standard_gate,
+                                   random_gate=random_gate,
+                                   avg_gate=avg_gate).cuda()
 
     elif args.net == 'pgmoe':
         network = Generalised_GMoE_VI(width=args.width,
