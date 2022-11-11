@@ -5,6 +5,7 @@ from helpers import *
 from model_moe_para_conv import UNetMoE_flexi
 import wandb
 from tqdm import tqdm
+from torch import optim
 
 # track the training
 from tensorboardX import SummaryWriter
@@ -119,7 +120,7 @@ def trainer(args):
             print('[step %d] loss: %.4f, lr: %.4f, train acc:%.4f, test acc: %.4f' % (j + 1, running_loss, current_lr, train_acc, val_acc))
             if val_acc > best_val_acc:
                 # save model
-                torch.save(network.state_dict(), args.net + '_model.pt')
+                torch.save(network.state_dict(), model_config + '_model.pt')
                 # update best val acc
                 best_val_acc = max(best_val_acc, val_acc)
             # log in:
